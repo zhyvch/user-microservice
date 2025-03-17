@@ -1,12 +1,12 @@
 from abc import ABC
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 
 @dataclass
 class BaseEntity(ABC):
-    id: str = field(
+    id: UUID = field(
         default_factory=uuid4,
         kw_only=True,
     )

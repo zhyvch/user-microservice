@@ -20,6 +20,7 @@ class UserCreateSchema(BaseModel):
             }
         }
 
+
 class UserDetailSchema(BaseModel):
     id: UUID
     created_at: AwareDatetime
@@ -41,6 +42,7 @@ class UserDetailSchema(BaseModel):
                 'middle_name': None,
             }
         }
+
 
 class UserUpdateSchema(BaseModel):
     phone_number: str | None = None
