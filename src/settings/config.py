@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
 
+    RABBITMQ_USER: str
+    RABBITMQ_PASSWORD: int
+    RABBITMQ_VHOST: str
+    RABBITMQ_PORT: int
+
     @property
     def POSTGRES_URL(self):
         return f'postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}'

@@ -21,7 +21,7 @@ class SQLAlchemyUserUnitOfWork(BaseUserUnitOfWork):
         await self.session.close()
 
     async def commit(self):
-        await self.session.commit()
+        await self.session._commit()
 
     async def rollback(self):
         await self.session.rollback()

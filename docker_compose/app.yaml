@@ -13,9 +13,9 @@ services:
       - '${USER_SERVICE_API_PORT}:8000'
     command: 'uvicorn --factory application.api.main:create_app --host 0.0.0.0 --port 8000 --reload'
     env_file:
-      - ../.env
+      - '../.env'
     volumes:
-      - ../src/:/src/
+      - ../src:/app/src
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/health"]
       interval: 30s

@@ -4,8 +4,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.entities.users import UserEntity
-from domain.value_objects.users import EmailVO, PhoneNumberVO, NameVO
-from infrastructure.converters.users import convert_user_entity_to_model
+from infrastructure.converters.users import convert_user_entity_to_model, convert_user_model_to_entity
 from infrastructure.models.users import UserModel
 from infrastructure.repositories.users.base import BaseUserRepository
 
@@ -18,14 +17,9 @@ class SQLAlchemyUserRepository(BaseUserRepository):
         user = await self.session.get(UserModel, user_id)
 
         if user:
-            return UserEntity(
-                id=user.id,
-                email=EmailVO(user.email),
-                phone_number=PhoneNumberVO(user.phone_number) if user.phone_number else None,
-                first_name=NameVO(user.first_name) if user.first_name else None,
-                last_name=NameVO(user.last_name) if user.last_name else None,
-                middle_name=NameVO(user.middle_name) if user.middle_name else None,
-            )
+            user = convert_user_model_to_entity(user)
+            self.loaded_users.add(user)
+            return user
 
 
     async def add(self, user: UserEntity) -> None:
