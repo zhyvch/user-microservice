@@ -7,6 +7,7 @@ def convert_user_entity_to_model(user: UserEntity) -> UserModel:
     return UserModel(
         id=user.id,
         email=user.email.as_generic(),
+        created_at=user.created_at,
         phone_number=user.phone_number.as_generic() if user.phone_number else None,
         first_name=user.first_name.as_generic() if user.first_name else None,
         last_name=user.last_name.as_generic() if user.last_name else None,

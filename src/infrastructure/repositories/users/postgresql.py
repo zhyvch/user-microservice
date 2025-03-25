@@ -18,10 +18,12 @@ class SQLAlchemyUserRepository(BaseUserRepository):
 
         if user:
             user = convert_user_model_to_entity(user)
-            self.loaded_users.add(user)
             return user
 
 
     async def add(self, user: UserEntity) -> None:
+        print(f'In repository {user.id}')
         user = convert_user_entity_to_model(user)
+        print(f'Out repository {user.id}')
         self.session.add(user)
+

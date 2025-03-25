@@ -1,45 +1,24 @@
-from uuid import UUID
+from typing import Annotated
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from punq import Container
 
 from application.api.users.schemas import (
     UserCreateSchema,
-    UserDetailSchema,
-    UserUpdateSchema,
 )
-from service.services import create_user_use_case, get_user_use_case, update_user_use_case, delete_user_use_case
-from service.units_of_work.users.postgresql import SQLAlchemyUserUnitOfWork
+from domain.commands.users import UserCreateCommand
+from service.container import initialize_container
+from service.message_bus import MessageBus
 
 router = APIRouter(tags=['Users'])
 
-# @router.post('/')
-# async def create_user(
-#     schema: UserCreateSchema,
-# ) -> UserDetailSchema:
-#     ...
-#
-# @router.get('/{user_id}')
-# async def get_user(
-#     user_id: UUID,
-# ) -> UserDetailSchema:
-#     ...
-#
-# @router.patch('/{user_id}')
-# async def update_user(
-#     user_id: UUID,
-#     schema: UserUpdateSchema,
-# ) -> UserDetailSchema:
-#     ...
-#
-# @router.delete('/{user_id}')
-# async def delete_user(
-#     user_id: UUID,
-# ) -> ...:
-#     ...
 
-# @router.patch('/{user_id}/credentials') ?
-# async def update_credentials(
-#     user_id: UUID,
-#     schema: UserUpdateCredentialsSchema,
-# ) -> UserDetailSchema:
-#     ...
+@router.post('/')
+async def create_user(
+    schema: UserCreateSchema,
+    container: Annotated[Container, Depends(initialize_container)]
+) -> str:
+    bus: MessageBus = container.resolve(MessageBus)
+    await bus.handle(message=UserCreateCommand(schema.to_user_with_credentials()))
+
+    return 'User successfully created'

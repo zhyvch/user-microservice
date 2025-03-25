@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
+from domain.commands.base import BaseCommand
 from domain.entities.users import UserWithCredentialsEntity
-from domain.events.base import BaseEvent
 
 
 @dataclass
-class UserCreatedEvent(BaseEvent):
+class UserCreateCommand(BaseCommand):
     user_with_credentials: UserWithCredentialsEntity
