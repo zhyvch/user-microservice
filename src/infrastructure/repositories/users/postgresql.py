@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from uuid import UUID
 
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from domain.commands.users import UserCredentialsStatus
 from domain.entities.users import UserEntity
 from infrastructure.converters.users import convert_user_entity_to_model, convert_user_model_to_entity
 from infrastructure.models.users import UserModel
@@ -22,8 +24,11 @@ class SQLAlchemyUserRepository(BaseUserRepository):
 
 
     async def add(self, user: UserEntity) -> None:
-        print(f'In repository {user.id}')
         user = convert_user_entity_to_model(user)
-        print(f'Out repository {user.id}')
         self.session.add(user)
+
+    async def update_status(self, user_id: UUID, status: UserCredentialsStatus) -> None:
+        stmt = update(UserModel).where(UserModel.id == user_id).values(credentials_status=status)
+        await self.session.execute(stmt)
+
 

@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Union
 
@@ -18,11 +17,11 @@ Message = Union[BaseEvent, BaseCommand]
 class MessageBus:
     uow: BaseUserUnitOfWork
     commands_map: dict[type[BaseCommand], BaseCommandHandler] = field(
-        default_factory=lambda: defaultdict(None),
+        default_factory=dict,
         kw_only=True,
     )
     events_map: dict[type[BaseEvent], list[BaseEventHandler]] = field(
-        default_factory=lambda: defaultdict(list),
+        default_factory=dict,
         kw_only=True,
     )
     queue: list[Message] = field(
@@ -35,26 +34,26 @@ class MessageBus:
         while self.queue:
             message = self.queue.pop(0)
             if isinstance(message, BaseCommand):
-                await self.handle_command(message)
+                await self._handle_command(message)
             elif isinstance(message, BaseEvent):
-                await self.handle_event(message)
+                await self._handle_event(message)
             else:
                 raise Exception(f'{message} was not an Event or Command')
 
-    async def handle_command(self, command: BaseCommand):
-        logger.debug('handling command %s', command)
+    async def _handle_command(self, command: BaseCommand):
+        logger.debug('Handling command %s', command)
         try:
-            handler = self.commands_map[type(command)]
+            handler = self.commands_map[command.__class__]
             await handler(command)
             self.queue.extend(self.uow.collect_new_event())
         except Exception:
             logger.exception('Exception handling command %s', command)
             raise
 
-    async def handle_event(self, event: BaseEvent):
+    async def _handle_event(self, event: BaseEvent):
         for handler in self.events_map[event.__class__]:
             try:
-                logger.debug('handling event %s with handler %s', event, handler)
+                logger.debug('Handling event %s with handler %s', event, handler)
                 await handler(event)
                 self.queue.extend(self.uow.collect_new_event())
             except Exception:

@@ -1,21 +1,9 @@
-import functools
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from uuid import UUID
 
+from domain.commands.users import UserCredentialsStatus
 from domain.entities.users import UserEntity
-
-#
-# @dataclass
-# class BaseUserRepository(ABC):
-#     @abstractmethod
-#     async def get(self, user_id: UUID) -> UserEntity | None:
-#         pass
-#
-#     @abstractmethod
-#     async def add(self, user: UserEntity) -> None:
-#         pass
-#
 
 
 @dataclass
@@ -24,11 +12,15 @@ class BaseUserRepository(ABC):
 
     @abstractmethod
     async def add(self, user: UserEntity) -> None:
-        pass
+        ...
 
     @abstractmethod
     async def get(self, user_id: UUID) -> UserEntity | None:
-        pass
+        ...
+
+    @abstractmethod
+    async def update_status(self, user_id: UUID, status: UserCredentialsStatus) -> None:
+        ...
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

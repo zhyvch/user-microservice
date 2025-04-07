@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-  postgres:
+  user-postgres:
     image: postgres:15-alpine
-    container_name: postgres
+    container_name: user-postgres
     ports:
       - '${POSTGRES_PORT}:5432'
     env_file:
@@ -16,6 +16,7 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+
 
 volumes:
   user_service_postgres_data:

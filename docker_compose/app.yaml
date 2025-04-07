@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: user-service
     depends_on:
-      postgres:
+      user-postgres:
         condition: service_healthy
     ports:
       - '${USER_SERVICE_API_PORT}:8000'
@@ -16,9 +16,4 @@ services:
       - '../.env'
     volumes:
       - ../src:/app/src
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     restart: unless-stopped

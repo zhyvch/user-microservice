@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+from uuid import UUID
 
-from domain.entities.users import UserWithCredentialsEntity
 from domain.events.base import BaseEvent
 
 
 @dataclass
 class UserCreatedEvent(BaseEvent):
-    user_with_credentials: UserWithCredentialsEntity
+    user_id: UUID
+    password: str
+    email: str
