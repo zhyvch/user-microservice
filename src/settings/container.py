@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 from punq import Container, Scope
+from redis.asyncio import Redis
 
 from application.external_events.consumers.base import BaseConsumer
 from application.external_events.consumers.rabbitmq import RabbitMQConsumer
@@ -10,7 +11,8 @@ from domain.commands.base import BaseCommand
 from domain.commands.users import CreateUserCommand, UpdateUserCredentialsStatusCommand
 from domain.events.base import BaseEvent
 from domain.events.users import UserCreatedEvent
-from infrastructure.database import session_factory
+from infrastructure.storages.cache import get_redis_client
+from infrastructure.storages.database import session_factory
 from infrastructure.producers.base import BaseProducer
 from infrastructure.producers.rabbitmq import RabbitMQProducer
 from infrastructure.repositories.users.base import BaseUserRepository
@@ -62,6 +64,9 @@ def _initialize_container() -> Container:
         }
         return external_events_map
 
+    def initialize_redis_client() -> Redis:
+        return get_redis_client()
+
     def initialize_user_sqlalchemy_repo() -> BaseUserRepository:
         return SQLAlchemyUserRepository(session_factory())
 
@@ -87,6 +92,7 @@ def _initialize_container() -> Container:
         return RabbitMQProducer()
 
     container.register(Settings, instance=settings, scope=Scope.singleton)
+    container.register(Redis, factory=initialize_redis_client, scope=Scope.singleton)
     container.register(BaseUserRepository, factory=initialize_user_sqlalchemy_repo)
     container.register(BaseUserUnitOfWork, factory=initialize_user_sqlalchemy_uow)
     container.register(MessageBus, factory=initialize_message_bus)

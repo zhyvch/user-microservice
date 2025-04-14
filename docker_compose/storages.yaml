@@ -1,13 +1,22 @@
 version: '3.9'
 
 services:
+  user-redis:
+    image: redis:latest
+    container_name: user-redis
+    ports:
+      - '${REDIS_PORT}:6379'
+    volumes:
+      - user_service_redis_data:/data
+    env_file:
+      - ../.env
   user-postgres:
     image: postgres:15-alpine
     container_name: user-postgres
     ports:
       - '${POSTGRES_PORT}:5432'
     env_file:
-      - '../.env'
+      - ../.env
     volumes:
       - user_service_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -17,6 +26,6 @@ services:
       retries: 5
     restart: unless-stopped
 
-
 volumes:
+  user_service_redis_data:
   user_service_postgres_data:

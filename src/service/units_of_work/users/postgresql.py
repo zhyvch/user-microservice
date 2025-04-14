@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from infrastructure.database import session_factory
+from infrastructure.storages.database import session_factory
 from infrastructure.repositories.users.postgresql import SQLAlchemyUserRepository
 from service.units_of_work.users.base import BaseUserUnitOfWork
 

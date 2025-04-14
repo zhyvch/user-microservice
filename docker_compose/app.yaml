@@ -9,6 +9,8 @@ services:
     depends_on:
       user-postgres:
         condition: service_healthy
+      user-redis:
+        condition: service_started
     ports:
       - '${USER_SERVICE_API_PORT}:8000'
     command: 'uvicorn --factory application.api.main:create_app --host 0.0.0.0 --port 8000 --reload'

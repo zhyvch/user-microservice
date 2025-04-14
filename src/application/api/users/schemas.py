@@ -26,7 +26,6 @@ class UserCreateSchema(BaseModel):
             password=PasswordVO(self.password),
         )
 
-
     class Config:
         json_schema_extra = {
             'example': {

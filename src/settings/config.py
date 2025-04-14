@@ -12,6 +12,11 @@ class Settings(BaseSettings):
 
     RSA_PUBLIC_KEY_PATH: Path = BASE_PATH / 'keys/public.pem'
 
+    REDIS_HOST: str
+    REDIS_PORT: int
+
+    CACHE_EXPIRATION_SECONDS: int = 60 * 60 * 24
+
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_USER: str
@@ -27,6 +32,10 @@ class Settings(BaseSettings):
     NANOSERVICES_EXCH_NAME: str
     USER_SERVICE_QUEUE_NAME: str = 'user_service_queue'
     USER_SERVICE_CONSUMING_RKS: list[str] = ['user.credentials.created', 'user.credentials.updated']
+
+    @property
+    def REDIS_URL(self):
+        return f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0'
 
     @property
     def POSTGRES_URL(self):

@@ -61,4 +61,5 @@ class RabbitMQConsumer(BaseConsumer):
         try:
             await self.external_events_map[message.routing_key](orjson.loads(message.body))
         except Exception as e:
-            print('Error processing message:', e)
+            print('Error processing message:', e, message.body)
+
