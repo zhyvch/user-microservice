@@ -19,7 +19,7 @@ class UserModel(Base):
 
     id: Mapped[uuid_pk]
     created_at: Mapped[timestamp] = mapped_column(nullable=False)
-    photo: Mapped[str] = mapped_column(String(255), nullable=True)
+    photo: Mapped[str] = mapped_column(String(255), nullable=False, default='')
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     phone_number: Mapped[str | None] = mapped_column(String(15), nullable=True)
     first_name: Mapped[str | None] = mapped_column(String(255), nullable=True)

@@ -4,6 +4,13 @@ from domain.exceptions.base import ApplicationException
 
 
 @dataclass(frozen=True, eq=False)
+class EmailTypeException(ApplicationException):
+    @property
+    def message(self) -> str:
+        return 'Email should be a string type'
+
+
+@dataclass(frozen=True, eq=False)
 class EmailIsEmptyException(ApplicationException):
     @property
     def message(self) -> str:
@@ -35,6 +42,13 @@ class EmailNotContainingAtSymbolException(ApplicationException):
     @property
     def message(self) -> str:
         return f'Email <{self.email}> must contain an "@" symbol'
+
+
+@dataclass(frozen=True, eq=False)
+class PhoneNumberTypeException(ApplicationException):
+    @property
+    def message(self) -> str:
+        return 'Phone number should be a string type'
 
 
 @dataclass(frozen=True, eq=False)
@@ -81,6 +95,13 @@ class PhoneNumberContainsNonDigitsException(ApplicationException):
 
 
 @dataclass(frozen=True, eq=False)
+class NameTypeException(ApplicationException):
+    @property
+    def message(self) -> str:
+        return 'Name should be a string type'
+
+
+@dataclass(frozen=True, eq=False)
 class NameIsEmptyException(ApplicationException):
     @property
     def message(self) -> str:
@@ -94,6 +115,13 @@ class NameTooLongException(ApplicationException):
     @property
     def message(self) -> str:
         return f'Name <{self.name[255:]}...> is too long'
+
+
+@dataclass(frozen=True, eq=False)
+class PasswordTypeException(ApplicationException):
+    @property
+    def message(self) -> str:
+        return 'Password should be a string type'
 
 
 @dataclass(frozen=True, eq=False)

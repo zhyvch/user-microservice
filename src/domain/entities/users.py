@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from domain.entities.base import BaseEntity
 from domain.value_objects.users import EmailVO, PhoneNumberVO, NameVO, PasswordVO
@@ -6,6 +6,7 @@ from domain.value_objects.users import EmailVO, PhoneNumberVO, NameVO, PasswordV
 
 @dataclass(eq=False)
 class UserEntity(BaseEntity):
+    photo: str = field(default='', kw_only=True)
     email: EmailVO
     phone_number: PhoneNumberVO | None
     first_name: NameVO | None

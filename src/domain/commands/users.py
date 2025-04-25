@@ -21,3 +21,9 @@ class CreateUserCommand(BaseCommand):
 class UpdateUserCredentialsStatusCommand(BaseCommand):
     user_id: UUID
     status: UserCredentialsStatus
+
+
+@dataclass
+class UpdateUserPhotoCommand(BaseCommand):
+    user_id: UUID
+    photo: str

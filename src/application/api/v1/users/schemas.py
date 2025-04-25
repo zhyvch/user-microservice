@@ -14,7 +14,7 @@ class UserCreateSchema(BaseModel):
     last_name: str | None = None
     middle_name: str | None = None
 
-    def to_user_with_credentials(self) -> UserWithCredentialsEntity:
+    def to_user_with_credentials_entity(self) -> UserWithCredentialsEntity:
         return UserWithCredentialsEntity(
             user=UserEntity(
                 email=EmailVO(self.email),
@@ -41,6 +41,7 @@ class UserCreateSchema(BaseModel):
 class UserDetailSchema(BaseModel):
     id: UUID
     created_at: datetime
+    photo: str
     email: str
     phone_number: str | None
     first_name: str | None
@@ -52,6 +53,7 @@ class UserDetailSchema(BaseModel):
             'example': {
                 'id': '123e4567-e89b-12d3-a456-426614174000',
                 'created_at': '2023-01-01T12:00:00+00:00',
+                'photo': 'https://example.com/photo.jpg',
                 'email': 'user@example.com',
                 'phone_number': '+12345678901',
                 'first_name': 'John',
@@ -59,3 +61,16 @@ class UserDetailSchema(BaseModel):
                 'middle_name': None,
             }
         }
+
+    @staticmethod
+    def from_user_entity(user: UserEntity):
+        return UserDetailSchema(
+            id=user.id,
+            created_at=user.created_at,
+            photo=user.photo,
+            email=user.email.as_generic(),
+            phone_number=user.phone_number.as_generic() if user.phone_number else None,
+            first_name=user.first_name.as_generic() if user.first_name else None,
+            last_name=user.last_name.as_generic() if user.last_name else None,
+            middle_name=user.middle_name.as_generic() if user.middle_name else None,
+        )

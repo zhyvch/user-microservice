@@ -1,3 +1,5 @@
+import logging
+
 import orjson
 
 from aio_pika import connect_robust
@@ -13,6 +15,7 @@ from aio_pika.abc import (
 from application.external_events.consumers.base import BaseConsumer
 from settings.config import settings
 
+logger = logging.getLogger(__name__)
 
 class RabbitMQConsumer(BaseConsumer):
     connection: AbstractRobustConnection
@@ -40,7 +43,13 @@ class RabbitMQConsumer(BaseConsumer):
         )
         for key in settings.USER_SERVICE_CONSUMING_RKS:
             await self.queue.bind(self.exchange, routing_key=key)
-            print(f'Queue "{self.queue.name}" bound to routing key "{key}".')
+            logger.info(
+                'Queue %(queue)s bound to routing key %(routing_key)s.',
+                {
+                    'queue': self.queue.name,
+                    'routing_key': key,
+                },
+            )
 
     async def stop(self):
         if self.channel:
@@ -61,5 +70,8 @@ class RabbitMQConsumer(BaseConsumer):
         try:
             await self.external_events_map[message.routing_key](orjson.loads(message.body))
         except Exception as e:
-            print('Error processing message:', e, message.body)
-
+            logger.exception(
+                'Error processing message(%(body)s)',
+                {'body': message.body},
+                exc_info=e,
+            )

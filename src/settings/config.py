@@ -1,4 +1,6 @@
+import logging
 from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,6 +9,7 @@ class Settings(BaseSettings):
 
     USER_SERVICE_API_PORT: int
     USER_SERVICE_DEBUG: bool
+    USER_SERVICE_MEDIA_PATH: str = 'user-service'
 
     JWT_ALGORITHM: str = 'RS256'
 
@@ -33,6 +36,17 @@ class Settings(BaseSettings):
     USER_SERVICE_QUEUE_NAME: str = 'user_service_queue'
     USER_SERVICE_CONSUMING_RKS: list[str] = ['user.credentials.created', 'user.credentials.updated']
 
+    LOG_LEVEL: int = logging.WARNING  # one of logging.getLevelNamesMapping().values()
+    LOG_FORMAT: str = '[%(asctime)s.%(msecs)03d] %(module)10s:%(lineno)-3d %(levelname)s - %(message)s'
+
+    S3_SECRET_ACCESS_KEY: str
+    S3_ENDPOINT_URL: str
+    S3_BUCKET_NAME: str
+    S3_PRESIGNED_EXPIRATION_SECONDS: int = 60 * 60
+
+    AWS_S3_ACCESS_KEY_ID: str
+    AWS_S3_REGION_NAME: str
+
     @property
     def REDIS_URL(self):
         return f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0'
@@ -43,7 +57,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=BASE_PATH / '.env',
-        case_sensitive=True
+        case_sensitive=True,
     )
 
-settings = Settings()
+settings = Settings()  # type: ignore
