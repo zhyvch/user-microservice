@@ -8,8 +8,9 @@ class Settings(BaseSettings):
     BASE_PATH: Path = Path(__file__).resolve().parent.parent.parent
 
     USER_SERVICE_API_PORT: int
-    USER_SERVICE_DEBUG: bool
+    USER_SERVICE_DEBUG: bool = True
     USER_SERVICE_MEDIA_PATH: str = 'user-service'
+    USER_SERVICE_DEFAULT_USER_PHOTO: str = 'default_php.svg.png'
 
     JWT_ALGORITHM: str = 'RS256'
 
@@ -34,7 +35,7 @@ class Settings(BaseSettings):
 
     NANOSERVICES_EXCH_NAME: str
     USER_SERVICE_QUEUE_NAME: str = 'user_service_queue'
-    USER_SERVICE_CONSUMING_RKS: list[str] = ['user.credentials.created', 'user.credentials.updated']
+    USER_SERVICE_CONSUMING_TOPICS: list[str] = ['user.credentials.created', 'user.credentials.updated']
 
     LOG_LEVEL: int = logging.WARNING  # one of logging.getLevelNamesMapping().values()
     LOG_FORMAT: str = '[%(asctime)s.%(msecs)03d] %(module)10s:%(lineno)-3d %(levelname)s - %(message)s'
@@ -59,5 +60,6 @@ class Settings(BaseSettings):
         env_file=BASE_PATH / '.env',
         case_sensitive=True,
     )
+
 
 settings = Settings()  # type: ignore

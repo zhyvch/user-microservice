@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Annotated
 from uuid import UUID
 
@@ -9,7 +10,7 @@ from application.api.v1.users.schemas import UserCreateSchema, UserDetailSchema
 from domain.commands.users import CreateUserCommand, UpdateUserPhotoCommand
 from infrastructure.auth.jwt import verify_token, extract_user_id
 from infrastructure.repositories.users.base import BaseUserRepository
-from infrastructure.storages.s3.clients.base import BaseS3Client
+from infrastructure.storages.s3.base import BaseS3Client
 from settings.config import Settings
 from settings.container import initialize_container
 from service.message_bus import MessageBus
@@ -23,6 +24,10 @@ async def get_current_user_id(
 ) -> UUID:
     return extract_user_id(verify_token(token.credentials))
 
+
+class ImageFormat(Enum):
+    png = 'image/png'
+    jpeg = 'image/jpeg'
 
 @router.post('/')
 async def start_registration(
@@ -64,7 +69,7 @@ async def get_photo_upload_url(
 async def get_photo_download_url(
         user_id: Annotated[UUID, Depends(get_current_user_id)],
         container: Annotated[Container, Depends(initialize_container)],
-        content_type: str = 'image/jpeg'
+        content_type: ImageFormat = ImageFormat.png,
 ) -> dict:
     s3_client: BaseS3Client = container.resolve(BaseS3Client)
     repo: BaseUserRepository = container.resolve(BaseUserRepository)
@@ -72,7 +77,7 @@ async def get_photo_download_url(
     key = user.photo
     download_url = await s3_client.generate_presigned_download_url(
         key=key,
-        content_type=content_type,
+        content_type=content_type.value,
     )
     return {'url': download_url}
 

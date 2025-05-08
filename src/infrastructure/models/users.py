@@ -6,8 +6,9 @@ from sqlalchemy import UUID, DateTime, String, CheckConstraint, Index
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
-from domain.commands.users import UserCredentialsStatus
+from domain.entities.users import UserCredentialsStatus
 from infrastructure.storages.database import Base
+from settings.config import settings
 
 uuid_pk = Annotated[uuid.UUID, mapped_column(UUID, primary_key=True)]
 timestamp = Annotated[datetime, mapped_column(DateTime(timezone=True))]
@@ -19,7 +20,7 @@ class UserModel(Base):
 
     id: Mapped[uuid_pk]
     created_at: Mapped[timestamp] = mapped_column(nullable=False)
-    photo: Mapped[str] = mapped_column(String(255), nullable=False, default='')
+    photo: Mapped[str] = mapped_column(String(255), nullable=False, default=settings.USER_SERVICE_DEFAULT_USER_PHOTO)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     phone_number: Mapped[str | None] = mapped_column(String(15), nullable=True)
     first_name: Mapped[str | None] = mapped_column(String(255), nullable=True)

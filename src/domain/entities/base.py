@@ -26,6 +26,3 @@ class BaseEntity(ABC):
 
     def __eq__(self, __value: 'BaseEntity') -> bool:
         return self.id == __value.id
-
-
-

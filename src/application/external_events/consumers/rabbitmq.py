@@ -41,7 +41,7 @@ class RabbitMQConsumer(BaseConsumer):
             settings.USER_SERVICE_QUEUE_NAME,
             durable=True,
         )
-        for key in settings.USER_SERVICE_CONSUMING_RKS:
+        for key in settings.USER_SERVICE_CONSUMING_TOPICS:
             await self.queue.bind(self.exchange, routing_key=key)
             logger.info(
                 'Queue %(queue)s bound to routing key %(routing_key)s.',

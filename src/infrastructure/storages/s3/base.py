@@ -3,6 +3,8 @@ from abc import ABC,abstractmethod
 from settings.config import settings
 
 
+# TODO: Make a repo from it?
+
 class BaseS3Client(ABC):
     secret_access_key: str = settings.S3_SECRET_ACCESS_KEY
     endpoint_url: str = settings.S3_ENDPOINT_URL

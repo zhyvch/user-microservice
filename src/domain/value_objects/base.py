@@ -16,9 +16,8 @@ class BaseVO(ABC, Generic[VT]):
 
     @abstractmethod
     def validate(self) -> bool:
-        pass
+        ...
 
     @abstractmethod
     def as_generic(self) -> VT:
-        pass
-
+        ...

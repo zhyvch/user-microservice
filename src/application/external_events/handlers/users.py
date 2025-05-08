@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from application.external_events.handlers.base import BaseExternalEventHandler
-from domain.commands.users import UpdateUserCredentialsStatusCommand, UserCredentialsStatus
+from domain.commands.users import UpdateUserCredentialsStatusCommand
+from domain.entities.users import UserCredentialsStatus
 from service.handlers.event.users import UserRegistrationCompletedEvent
 
 
@@ -26,6 +27,6 @@ class UserCredentialsCreatedExternalEventHandler(BaseExternalEventHandler):
                 first_name=user.first_name.as_generic() if user.first_name else None,
                 last_name=user.last_name.as_generic() if user.last_name else None,
                 middle_name=user.middle_name.as_generic() if user.middle_name else None,
-                credentials_status=UserCredentialsStatus(body['status']),
+                credentials_status=user.credentials_status,
             )
         )

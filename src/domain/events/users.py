@@ -1,8 +1,8 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
-from domain.commands.users import UserCredentialsStatus
+from domain.entities.users import UserCredentialsStatus
 from domain.events.base import BaseEvent
 
 

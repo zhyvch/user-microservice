@@ -1,7 +1,14 @@
 from dataclasses import dataclass, field
+from enum import Enum
 
 from domain.entities.base import BaseEntity
 from domain.value_objects.users import EmailVO, PhoneNumberVO, NameVO, PasswordVO
+
+
+class UserCredentialsStatus(Enum):
+    PENDING = 'pending'
+    SUCCESS = 'success'
+    FAILED = 'failed'
 
 
 @dataclass(eq=False)
@@ -12,6 +19,7 @@ class UserEntity(BaseEntity):
     first_name: NameVO | None
     last_name: NameVO | None
     middle_name: NameVO | None
+    credentials_status: UserCredentialsStatus = field(default=UserCredentialsStatus.PENDING, kw_only=True)
 
 
 @dataclass

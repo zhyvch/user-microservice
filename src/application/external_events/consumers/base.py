@@ -16,9 +16,9 @@ class BaseConsumer(ABC):
         ...
 
     @abstractmethod
-    async def consume(self):
+    async def stop(self):
         ...
 
     @abstractmethod
-    async def stop(self):
+    async def consume(self):
         ...

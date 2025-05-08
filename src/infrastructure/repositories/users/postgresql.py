@@ -4,8 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from domain.commands.users import UserCredentialsStatus
-from domain.entities.users import UserEntity
+from domain.entities.users import UserEntity, UserCredentialsStatus
 from infrastructure.cache import cache_repository
 from infrastructure.converters.users import convert_user_entity_to_model, convert_user_model_to_entity
 from infrastructure.models.users import UserModel

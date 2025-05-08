@@ -33,3 +33,11 @@ auto-revision:
 .PHONY: revision-upgrade
 revision-upgrade:
 	${EXEC} ${APP_CONTAINER} alembic upgrade head
+
+.PHONY: revision-downgrade
+revision-downgrade:
+	${EXEC} ${APP_CONTAINER} alembic downgrade -1
+
+.PHONY: tests
+pytest:
+	${EXEC} ${APP_CONTAINER} pytest --run-all

@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 from aiobotocore.session import AioSession, get_session
 
-from infrastructure.storages.s3.clients.base import BaseS3Client
+from infrastructure.storages.s3.base import BaseS3Client
 from settings.config import settings
 
 logger = logging.getLogger(__name__)

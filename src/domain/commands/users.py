@@ -1,15 +1,8 @@
 from dataclasses import dataclass
-from enum import Enum
 from uuid import UUID
 
 from domain.commands.base import BaseCommand
-from domain.entities.users import UserWithCredentialsEntity
-
-
-class UserCredentialsStatus(Enum):
-    PENDING = 'pending'
-    SUCCESS = 'success'
-    FAILED = 'failed'
+from domain.entities.users import UserWithCredentialsEntity, UserCredentialsStatus
 
 
 @dataclass

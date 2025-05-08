@@ -79,7 +79,7 @@ class MessageBus:
 
     async def _handle_event(self, event: BaseEvent):
         logger.info('Handling event: %s', event.__class__.__name__)
-        handlers = self.events_map.get(event.__class__, [])
+        handlers = self.events_map.get(event.__class__)
         if not handlers:
             logger.error('No handlers registered for event: %s', event.__class__.__name__)
             return

@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from domain.commands.users import UserCredentialsStatus
-from domain.entities.users import UserEntity
+from domain.entities.users import UserEntity, UserCredentialsStatus
 
 logger = logging.getLogger(__name__)
 
