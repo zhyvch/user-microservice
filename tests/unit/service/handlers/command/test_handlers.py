@@ -1,16 +1,26 @@
 import pytest
 
-from domain.commands.users import CreateUserCommand, UpdateUserCredentialsStatusCommand, UpdateUserPhotoCommand
+from domain.commands.users import (
+    CreateUserCommand,
+    UpdateUserCredentialsStatusCommand,
+    UpdateUserPhotoCommand,
+    DeleteUserCommand,
+)
 from domain.entities.users import UserWithCredentialsEntity, UserCredentialsStatus
+from domain.events.users import UserCreatedEvent, UserDeletedEvent
 from domain.value_objects.users import PasswordVO
-from service.handlers.command.users import CreateUserCommandHandler, UpdateUserCredentialsStatusCommandHandler, \
-    UpdateUserPhotoCommandHandler
+from service.handlers.command.users import (
+    CreateUserCommandHandler,
+    UpdateUserCredentialsStatusCommandHandler,
+    UpdateUserPhotoCommandHandler,
+    DeleteUserCommandHandler,
+)
 
 
 @pytest.mark.asyncio
 class TestCommandHandlers:
     async def test_create_user_command_handler(
-            self, random_user_entity, fake_user_uow, fake_consumer
+        self, random_user_entity, fake_user_uow, fake_consumer
     ):
         command = CreateUserCommand(
             user_with_credentials=UserWithCredentialsEntity(
@@ -24,17 +34,36 @@ class TestCommandHandlers:
 
         async with fake_user_uow:
             user = await fake_user_uow.users.get(user_id=random_user_entity.id)
-            assert user is not None
-            assert user.id == random_user_entity.id
-            assert user.credentials_status == random_user_entity.credentials_status
 
-        while not fake_consumer.broker.queue.empty():
-            expected_produced_topics = ['user.created']
-            item = await fake_consumer.broker.queue.get()
-            assert item['topic'] in expected_produced_topics
+        assert user is not None
+        assert user.id == random_user_entity.id
+        assert user.credentials_status == random_user_entity.credentials_status
+
+        assert UserCreatedEvent in [event.__class__ for event in random_user_entity.events]
+
+
+    async def test_delete_user_command_handler(
+        self, random_user_entity, fake_user_uow, fake_consumer
+    ):
+        async with fake_user_uow:
+            await fake_user_uow.users.add(random_user_entity)
+            await fake_user_uow.commit()
+
+        command = DeleteUserCommand(user_id=random_user_entity.id)
+        async with fake_consumer:
+            handler = DeleteUserCommandHandler(uow=fake_user_uow)
+            await handler(command=command)
+
+        async with fake_user_uow:
+            user = await fake_user_uow.users.get(user_id=random_user_entity.id)
+
+        assert user is None
+
+        assert UserDeletedEvent in [event.__class__ for event in random_user_entity.events]
+
 
     async def test_update_user_credentials_status_command_handler(
-            self, random_user_entity, fake_user_uow
+        self, random_user_entity, fake_user_uow
     ):
         async with fake_user_uow:
             await fake_user_uow.users.add(random_user_entity)
@@ -51,28 +80,33 @@ class TestCommandHandlers:
 
         async with fake_user_uow:
             user = await fake_user_uow.users.get(user_id=random_user_entity.id)
-            assert user is not None
-            assert user.id == random_user_entity.id
-            assert user.credentials_status == new_status
+
+        assert user is not None
+        assert user.id == random_user_entity.id
+        assert user.credentials_status == new_status
+
 
     async def test_update_user_photo_command_handler(
-            self, random_user_entity, fake_user_uow
+        self, random_user_entity, fake_user_uow
     ):
         async with fake_user_uow:
             await fake_user_uow.users.add(random_user_entity)
             await fake_user_uow.commit()
             user = await fake_user_uow.users.get(user_id=random_user_entity.id)
-            old_photo = user.photo
+
+        old_photo = user.photo
+        new_photo = 'new_photo.png'
 
         command = UpdateUserPhotoCommand(
             user_id=random_user_entity.id,
-            photo='new_photo.png'
+            photo=new_photo,
         )
         handler = UpdateUserPhotoCommandHandler(uow=fake_user_uow)
         await handler(command=command)
 
         async with fake_user_uow:
             user = await fake_user_uow.users.get(user_id=random_user_entity.id)
-            assert user is not None
-            assert user.id == random_user_entity.id
-            assert user.photo != old_photo
+
+        assert user is not None
+        assert user.id == random_user_entity.id
+        assert user.photo == new_photo != old_photo

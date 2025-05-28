@@ -21,6 +21,10 @@ class BaseUserRepository(ABC):
         ...
 
     @abstractmethod
+    async def remove(self, user_id: UUID) -> None:
+        ...
+
+    @abstractmethod
     async def update_status(self, user_id: UUID, status: UserCredentialsStatus) -> None:
         ...
 

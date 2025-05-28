@@ -14,6 +14,11 @@ class UserCreatedEvent(BaseEvent):
 
 
 @dataclass
+class UserDeletedEvent(BaseEvent):
+    user_id: UUID
+
+
+@dataclass
 class UserRegistrationCompletedEvent(BaseEvent):
     user_id: UUID
     photo: str

@@ -10,6 +10,7 @@ from infrastructure.converters.users import convert_user_json_to_entity, convert
 from infrastructure.storages.cache import get_redis_client
 from settings.config import settings
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -58,5 +59,6 @@ class RedisUserRepositoryCacher(BaseUserRepositoryCacher):
         except Exception as e:
             logger.exception('Error removing user \'%s\' from Redis cache: %s', user_id, str(e))
             raise
+
 
 cache_repository = RedisUserRepositoryCacher()

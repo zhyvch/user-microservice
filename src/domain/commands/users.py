@@ -11,6 +11,11 @@ class CreateUserCommand(BaseCommand):
 
 
 @dataclass
+class DeleteUserCommand(BaseCommand):
+    user_id: UUID
+
+
+@dataclass
 class UpdateUserCredentialsStatusCommand(BaseCommand):
     user_id: UUID
     status: UserCredentialsStatus

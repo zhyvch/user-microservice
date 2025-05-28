@@ -5,8 +5,7 @@ import pytest
 
 from application.external_events.handlers.users import UserCredentialsCreatedExternalEventHandler
 from domain.entities.users import UserCredentialsStatus
-from settings.config import settings
-from settings.container import get_commands_map, get_events_map, get_external_events_map
+from domain.events.users import UserRegistrationCompletedEvent
 
 
 @pytest.mark.asyncio
@@ -36,8 +35,4 @@ class TestExternalEventHandlers:
                     user = await fake_user_uow.users.get(user_id=random_user_entity.id)
                     assert user.credentials_status == UserCredentialsStatus(body['status'])
 
-        while not fake_consumer.broker.queue.empty():
-            expected_produced_topics = ['user.registration.completed']
-            item = await fake_consumer.broker.queue.get()
-            assert item['topic'] in expected_produced_topics
-
+        assert fake_consumer.broker.queue.pop()['event'] == UserRegistrationCompletedEvent.__name__

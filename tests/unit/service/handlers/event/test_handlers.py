@@ -1,30 +1,47 @@
 import pytest
 
-from domain.events.users import UserCreatedEvent, UserRegistrationCompletedEvent
-from service.handlers.event.users import UserCreatedEventHandler, UserRegistrationCompletedEventHandler
+from domain.events.users import (
+    UserCreatedEvent,
+    UserRegistrationCompletedEvent,
+    UserDeletedEvent,
+)
+from service.handlers.event.users import (
+    UserCreatedEventHandler,
+    UserRegistrationCompletedEventHandler,
+    UserDeletedEventHandler,
+)
 
 
 @pytest.mark.asyncio
 class TestEventHandlers:
     async def test_user_created_event_handler(
-            self, random_user_entity, fake_user_uow, fake_producer
+        self, random_user_entity, fake_user_uow, fake_producer
     ):
         event = UserCreatedEvent(
             user_id=random_user_entity.id,
             password='VerySecretPa$$word1234',
             email=random_user_entity.email.value,
         )
-        topic_to_produce = 'user.created'
-        handler = UserCreatedEventHandler(producer=fake_producer, topic=topic_to_produce)
+        handler = UserCreatedEventHandler(producer=fake_producer, topic='user.created')
         await handler(event=event)
 
-        while not fake_producer.broker.queue.empty():
-            expected_produced_topics = [topic_to_produce]
-            item = await fake_producer.broker.queue.get()
-            assert item['topic'] in expected_produced_topics
+        assert fake_producer.broker.queue.pop()['event'] == UserCreatedEvent.__name__
+
+
+    async def test_user_deleted_event_handler(
+        self, random_user_entity, fake_user_uow, fake_producer
+    ):
+        event = UserDeletedEvent(
+            user_id=random_user_entity.id,
+        )
+        handler = UserDeletedEventHandler(producer=fake_producer, topic='user.deleted')
+        await handler(event=event)
+
+        assert fake_producer.broker.queue.pop()['event'] == UserDeletedEvent.__name__
+
 
     async def test_user_registration_completed_event_handler(
-            self, random_user_entity, fake_user_uow, fake_producer
+        self, random_user_entity, fake_user_uow, fake_producer
     ):
         event = UserRegistrationCompletedEvent(
             user_id=random_user_entity.id,
@@ -37,11 +54,7 @@ class TestEventHandlers:
             middle_name=random_user_entity.middle_name.value if random_user_entity.middle_name else None,
             credentials_status=random_user_entity.credentials_status,
         )
-        topic_to_produce = 'user.registration.completed'
-        handler = UserRegistrationCompletedEventHandler(producer=fake_producer, topic=topic_to_produce)
+        handler = UserRegistrationCompletedEventHandler(producer=fake_producer, topic='user.registration.completed')
         await handler(event=event)
 
-        while not fake_producer.broker.queue.empty():
-            expected_produced_topics = [topic_to_produce]
-            item = await fake_producer.broker.queue.get()
-            assert item['topic'] in expected_produced_topics
+        assert fake_producer.broker.queue.pop()['event'] == UserRegistrationCompletedEvent.__name__

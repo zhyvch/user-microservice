@@ -10,10 +10,11 @@ from infrastructure.converters.users import convert_user_entity_to_model, conver
 from infrastructure.models.users import UserModel
 from infrastructure.repositories.users.base import BaseUserRepository
 
+
 logger = logging.getLogger(__name__)
 
 
-@cache_repository
+# @cache_repository
 @dataclass
 class SQLAlchemyUserRepository(BaseUserRepository):
     session: AsyncSession
@@ -40,6 +41,19 @@ class SQLAlchemyUserRepository(BaseUserRepository):
             logger.info('User \'%s\' added to DB session', user.id)
         except Exception as e:
             logger.exception('Error adding user \'%s\' to DB: %s', user.id, str(e))
+            raise
+
+    async def remove(self, user_id: UUID) -> None:
+        logger.debug('Removing user \'%s\' from DB', user_id)
+        try:
+            user = await self.session.get(UserModel, user_id)
+            if user:
+                await self.session.delete(user)
+                logger.info('User \'%s\' removed from DB session', user_id)
+            else:
+                logger.warning('Attempted to remove non-existent user \'%s\'', user_id)
+        except Exception as e:
+            logger.exception('Error removing user \'%s\' from DB: %s', user_id, str(e))
             raise
 
     async def update_status(self, user_id: UUID, status: UserCredentialsStatus) -> None:

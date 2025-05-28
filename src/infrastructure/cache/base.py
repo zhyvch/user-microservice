@@ -22,6 +22,7 @@ class BaseUserRepositoryCacher(ABC):
 
     def __call__(self, cls):
         get = cls.get
+        remove = cls.remove
         update_status = cls.update_status
         update_photo = cls.update_photo
 
@@ -43,6 +44,17 @@ class BaseUserRepositoryCacher(ABC):
                 except Exception as e:
                     logger.exception('Failed to add user \'%s\' to cache: %s', user_id, str(e))
             return user
+
+        async def _remove(cls_self, user_id: UUID) -> None:
+            logger.debug('Removing user \'%s\'', user_id)
+            await remove(cls_self, user_id)
+
+            logger.debug('Removing user \'%s\' from cache', user_id)
+            try:
+                await self.remove_from_cache(user_id)
+                logger.debug('User \'%s\' successfully removed from cache', user_id)
+            except Exception as e:
+                logger.critical('Failed to remove user \'%s\' from cache: %s', user_id, str(e), exc_info=True)
 
         async def _update_status(cls_self, user_id: UUID, status: str) -> None:
             logger.debug('Updating status for user \'%s\' to \'%s\'', user_id, status)
@@ -67,6 +79,7 @@ class BaseUserRepositoryCacher(ABC):
                 logger.critical('Failed to remove user \'%s\' from cache: %s', user_id, str(e), exc_info=True)
 
         cls.get = _get
+        cls.remove = _remove
         cls.update_status = _update_status
         cls.update_photo = _update_photo
         return cls

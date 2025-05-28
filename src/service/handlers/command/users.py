@@ -1,11 +1,13 @@
 import logging
 from dataclasses import dataclass
 
-from domain.commands.users import CreateUserCommand, UpdateUserCredentialsStatusCommand, UpdateUserPhotoCommand
-from domain.events.users import UserCreatedEvent
+from domain.commands.users import CreateUserCommand, UpdateUserCredentialsStatusCommand, UpdateUserPhotoCommand, \
+    DeleteUserCommand
+from domain.events.users import UserCreatedEvent, UserDeletedEvent
 from service.exceptions.users import TransactionException
 from service.handlers.command.base import BaseCommandHandler
 from service.units_of_work.users.base import BaseUserUnitOfWork
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +30,24 @@ class CreateUserCommandHandler(BaseCommandHandler):
                 logger.info('User created successfully with ID: \'%s\'', command.user_with_credentials.user.id)
             except Exception as e:
                 logger.exception('Failed to create user: %s', str(e))
+                raise TransactionException() from e
+
+
+@dataclass
+class DeleteUserCommandHandler(BaseCommandHandler):
+    uow: BaseUserUnitOfWork
+
+    async def __call__(self, command: DeleteUserCommand) -> None:
+        logger.info('Deleting user with ID: \'%s\'', command.user_id)
+        async with self.uow:
+            try:
+                user = await self.uow.users.get(command.user_id)
+                await self.uow.users.remove(user_id=command.user_id)
+                await self.uow.commit()
+                user.events.append(UserDeletedEvent(user_id=command.user_id))
+                logger.info('User deleted successfully with ID: \'%s\'', command.user_id)
+            except Exception as e:
+                logger.exception('Failed to delete user: %s', str(e))
                 raise TransactionException() from e
 
 

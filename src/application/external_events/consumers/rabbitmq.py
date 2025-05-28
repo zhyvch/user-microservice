@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass, field
 
 import orjson
 
@@ -13,35 +14,45 @@ from aio_pika.abc import (
 )
 
 from application.external_events.consumers.base import BaseConsumer
-from settings.config import settings
+
 
 logger = logging.getLogger(__name__)
 
+
+@dataclass
 class RabbitMQConsumer(BaseConsumer):
-    connection: AbstractRobustConnection
-    channel: AbstractRobustChannel
-    exchange: AbstractRobustExchange
-    queue: AbstractRobustQueue
+    host: str
+    port: int
+    login: str
+    password: str
+    virtual_host: str
+    exchange_name: str
+    queue_name: str
+    consuming_topics: list[str] = field(default_factory=list)
+    connection: AbstractRobustConnection | None = None
+    channel: AbstractRobustChannel | None = None
+    exchange: AbstractRobustExchange | None = None
+    queue: AbstractRobustQueue | None = None
 
     async def start(self):
         self.connection = await connect_robust(
-            host=settings.RABBITMQ_HOST,
-            port=settings.RABBITMQ_PORT,
-            login=settings.RABBITMQ_USER,
-            password=settings.RABBITMQ_PASSWORD,
-            virtual_host=settings.RABBITMQ_VHOST,
+            host=self.host,
+            port=self.port,
+            login=self.login,
+            password=self.password,
+            virtual_host=self.virtual_host,
         )
         self.channel = await self.connection.channel()
         self.exchange = await self.channel.declare_exchange(
-            settings.NANOSERVICES_EXCH_NAME,
+            self.exchange_name,
             ExchangeType.TOPIC,
             durable=True,
         )
         self.queue = await self.channel.declare_queue(
-            settings.USER_SERVICE_QUEUE_NAME,
+            self.queue_name,
             durable=True,
         )
-        for key in settings.USER_SERVICE_CONSUMING_TOPICS:
+        for key in self.consuming_topics:
             await self.queue.bind(self.exchange, routing_key=key)
             logger.info(
                 'Queue %(queue)s bound to routing key %(routing_key)s.',

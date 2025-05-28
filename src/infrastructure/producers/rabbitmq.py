@@ -1,41 +1,54 @@
 import logging
+from dataclasses import dataclass
+
 import aio_pika
 import orjson
-from aio_pika.abc import AbstractRobustConnection, AbstractRobustChannel, AbstractExchange
+from aio_pika.abc import AbstractRobustConnection, AbstractRobustChannel, AbstractExchange, ExchangeType
 
 from domain.events.base import BaseEvent
 from infrastructure.producers.base import BaseProducer
-from settings.config import settings
 
 logger = logging.getLogger(__name__)
 
 
+@dataclass
 class RabbitMQProducer(BaseProducer):
-    connection: AbstractRobustConnection
-    channel: AbstractRobustChannel
-    exchange: AbstractExchange
+    host: str
+    port: int
+    login: str
+    password: str
+    virtual_host: str
+    exchange_name: str
+    connection: AbstractRobustConnection | None = None
+    channel: AbstractRobustChannel | None = None
+    exchange: AbstractExchange | None = None
+
 
     async def start(self):
         logger.info(
             'Establishing connection to RabbitMQ at %s:%d',
-            settings.RABBITMQ_HOST,
-            settings.RABBITMQ_PORT,
+            self.host,
+            self.port,
         )
         try:
             self.connection = await aio_pika.connect_robust(
-                host=settings.RABBITMQ_HOST,
-                port=settings.RABBITMQ_PORT,
-                login=settings.RABBITMQ_USER,
-                password=settings.RABBITMQ_PASSWORD,
-                virtual_host=settings.RABBITMQ_VHOST,
+                host=self.host,
+                port=self.port,
+                login=self.login,
+                password=self.password,
+                virtual_host=self.virtual_host,
             )
             logger.debug('RabbitMQ connection established')
 
             self.channel = await self.connection.channel()
             logger.debug('RabbitMQ channel created')
 
-            self.exchange = await self.channel.get_exchange(name=settings.NANOSERVICES_EXCH_NAME)
-            logger.info('Connected to RabbitMQ exchange \'%s\'', settings.NANOSERVICES_EXCH_NAME)
+            self.exchange = await self.channel.declare_exchange(
+                self.exchange_name,
+                ExchangeType.TOPIC,
+                durable=True,
+            )
+            logger.info('Connected to RabbitMQ exchange \'%s\'', self.exchange_name)
         except Exception as e:
             logger.critical('Failed to connect to RabbitMQ: %s', str(e), exc_info=True)
             raise

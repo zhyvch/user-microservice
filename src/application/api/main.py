@@ -13,7 +13,6 @@ from infrastructure.producers.base import BaseProducer
 from settings.container import initialize_container
 from settings.config import settings
 
-API_V1_PREFIX = '/api/v1'
 
 logging.basicConfig(
     level=settings.LOG_LEVEL,
@@ -44,12 +43,12 @@ def create_app():
     app = FastAPI(
         title='User Service',
         description='Simple user service',
-        docs_url='/api/docs',
+        docs_url=settings.USER_SERVICE_API_DOCS_URL,
         debug=settings.USER_SERVICE_DEBUG,
         lifespan=lifespan,
         default_response_class=ORJSONResponse,
     )
-    app.include_router(router, prefix=API_V1_PREFIX)
+    app.include_router(router, prefix=settings.USER_SERVICE_API_PREFIX)
     exception_registry(app)
 
     return app

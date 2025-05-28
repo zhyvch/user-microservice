@@ -39,5 +39,5 @@ revision-downgrade:
 	${EXEC} ${APP_CONTAINER} alembic downgrade -1
 
 .PHONY: tests
-pytest:
+tests:
 	${EXEC} ${APP_CONTAINER} pytest --run-all

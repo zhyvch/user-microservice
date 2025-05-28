@@ -7,7 +7,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     BASE_PATH: Path = Path(__file__).resolve().parent.parent.parent
 
+    DOCKER_RUN: bool = False
+
+    USER_SERVICE_API_HOST: str = '127.0.0.1'
     USER_SERVICE_API_PORT: int
+    USER_SERVICE_API_PREFIX: str = '/api/v1'
+    USER_SERVICE_API_DOCS_URL: str = '/api/docs'
     USER_SERVICE_DEBUG: bool = True
     USER_SERVICE_MEDIA_PATH: str = 'user-service'
     USER_SERVICE_DEFAULT_USER_PHOTO: str = 'default_php.svg.png'
@@ -50,11 +55,22 @@ class Settings(BaseSettings):
 
     @property
     def REDIS_URL(self):
-        return f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0'
+        return (
+            f'redis://'
+            f'{self.REDIS_HOST}:'
+            f'{6379 if self.DOCKER_RUN else self.REDIS_PORT}/0'
+        )
 
     @property
     def POSTGRES_URL(self):
-        return f'postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{5432}/{self.POSTGRES_DB}'
+        return (
+            f'postgresql+asyncpg://'
+            f'{self.POSTGRES_USER}:'
+            f'{self.POSTGRES_PASSWORD}@'
+            f'{self.POSTGRES_HOST}:'
+            f'{5432 if self.DOCKER_RUN else self.POSTGRES_PORT}/'
+            f'{self.POSTGRES_DB}'
+        )
 
     model_config = SettingsConfigDict(
         env_file=BASE_PATH / '.env',

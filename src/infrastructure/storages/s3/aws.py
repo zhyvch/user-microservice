@@ -1,19 +1,20 @@
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from aiobotocore.session import AioSession, get_session
 
 from infrastructure.storages.s3.base import BaseS3Client
 from settings.config import settings
 
+
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class AWSS3Client(BaseS3Client):
-    aws_access_key_id: str = settings.AWS_S3_ACCESS_KEY_ID
-    aws_region_name: str = settings.AWS_S3_REGION_NAME
-    session: AioSession = field(default_factory=get_session)
+    aws_access_key_id: str
+    aws_region_name: str
+    session: AioSession
 
     async def generate_presigned_upload_post(
             self,

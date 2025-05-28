@@ -1,14 +1,17 @@
 from abc import ABC,abstractmethod
+from dataclasses import dataclass
 
 from settings.config import settings
 
 
 # TODO: Make a repo from it?
 
+
+@dataclass
 class BaseS3Client(ABC):
-    secret_access_key: str = settings.S3_SECRET_ACCESS_KEY
-    endpoint_url: str = settings.S3_ENDPOINT_URL
-    bucket_name: str = settings.S3_BUCKET_NAME
+    secret_access_key: str
+    endpoint_url: str
+    bucket_name: str
 
     @abstractmethod
     async def generate_presigned_upload_post(
