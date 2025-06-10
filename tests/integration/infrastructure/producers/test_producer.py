@@ -16,7 +16,7 @@ class TestRabbitMQProducer:
         assert rabbitmq_consumer.connection is not None
         assert rabbitmq_producer.connection is not None
 
-        await rabbitmq_producer.publish(event=event, topic='fake.topic')
+        await rabbitmq_producer.publish(event=event, topic='fake.user.topic')
         messages = []
         async with rabbitmq_consumer.queue.iterator() as queue_iterator:
             async for message in queue_iterator:

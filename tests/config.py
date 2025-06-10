@@ -22,7 +22,7 @@ class TestSettings(BaseSettings):
 
     TESTS_USER_SERVICE_QUEUE_NAME: str = 'tests_user_service_queue'
     TESTS_NANOSERVICES_EXCH_NAME: str
-    TESTS_USER_SERVICE_CONSUMING_TOPICS: list[str] = ['fake.topic', 'user.credentials.created', 'user.credentials.updated']
+    TESTS_USER_SERVICE_CONSUMING_TOPICS: list[str] = ['fake.user.topic', 'user.credentials.created', 'user.credentials.updated']
 
     @property
     def TESTS_POSTGRES_URL(self):

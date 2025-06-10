@@ -1,24 +1,24 @@
 from dataclasses import dataclass
 
-from domain.exceptions.base import ApplicationException
+from domain.exceptions.base import DomainException
 
 
 @dataclass(frozen=True, eq=False)
-class EmailTypeException(ApplicationException):
+class EmailTypeException(DomainException):
     @property
     def message(self) -> str:
         return 'Email should be a string type'
 
 
 @dataclass(frozen=True, eq=False)
-class EmailIsEmptyException(ApplicationException):
+class EmailIsEmptyException(DomainException):
     @property
     def message(self) -> str:
         return 'Email is empty'
 
 
 @dataclass(frozen=True, eq=False)
-class EmailTooShortException(ApplicationException):
+class EmailTooShortException(DomainException):
     email: str
 
     @property
@@ -27,7 +27,7 @@ class EmailTooShortException(ApplicationException):
 
 
 @dataclass(frozen=True, eq=False)
-class EmailTooLongException(ApplicationException):
+class EmailTooLongException(DomainException):
     email: str
 
     @property
@@ -36,7 +36,7 @@ class EmailTooLongException(ApplicationException):
 
 
 @dataclass(frozen=True, eq=False)
-class EmailNotContainingAtSymbolException(ApplicationException):
+class EmailNotContainingAtSymbolException(DomainException):
     email: str
 
     @property
@@ -45,21 +45,21 @@ class EmailNotContainingAtSymbolException(ApplicationException):
 
 
 @dataclass(frozen=True, eq=False)
-class PhoneNumberTypeException(ApplicationException):
+class PhoneNumberTypeException(DomainException):
     @property
     def message(self) -> str:
         return 'Phone number should be a string type'
 
 
 @dataclass(frozen=True, eq=False)
-class PhoneNumberIsEmptyException(ApplicationException):
+class PhoneNumberIsEmptyException(DomainException):
     @property
     def message(self) -> str:
         return 'Phone number is empty'
 
 
 @dataclass(frozen=True, eq=False)
-class PhoneNumberTooShortException(ApplicationException):
+class PhoneNumberTooShortException(DomainException):
     phone_number: str
 
     @property
@@ -68,7 +68,7 @@ class PhoneNumberTooShortException(ApplicationException):
 
 
 @dataclass(frozen=True, eq=False)
-class PhoneNumberTooLongException(ApplicationException):
+class PhoneNumberTooLongException(DomainException):
     phone_number: str
 
     @property
@@ -77,7 +77,7 @@ class PhoneNumberTooLongException(ApplicationException):
 
 
 @dataclass(frozen=True, eq=False)
-class PhoneNumberNotStartingWithPlusSymbolException(ApplicationException):
+class PhoneNumberNotStartingWithPlusSymbolException(DomainException):
     phone_number: str
 
     @property
@@ -86,7 +86,7 @@ class PhoneNumberNotStartingWithPlusSymbolException(ApplicationException):
 
 
 @dataclass(frozen=True, eq=False)
-class PhoneNumberContainsNonDigitsException(ApplicationException):
+class PhoneNumberContainsNonDigitsException(DomainException):
     phone_number: str
 
     @property
@@ -95,21 +95,21 @@ class PhoneNumberContainsNonDigitsException(ApplicationException):
 
 
 @dataclass(frozen=True, eq=False)
-class NameTypeException(ApplicationException):
+class NameTypeException(DomainException):
     @property
     def message(self) -> str:
         return 'Name should be a string type'
 
 
 @dataclass(frozen=True, eq=False)
-class NameIsEmptyException(ApplicationException):
+class NameIsEmptyException(DomainException):
     @property
     def message(self) -> str:
         return 'Name is empty'
 
 
 @dataclass(frozen=True, eq=False)
-class NameTooLongException(ApplicationException):
+class NameTooLongException(DomainException):
     name: str
 
     @property
@@ -118,49 +118,56 @@ class NameTooLongException(ApplicationException):
 
 
 @dataclass(frozen=True, eq=False)
-class PasswordTypeException(ApplicationException):
+class PasswordTypeException(DomainException):
     @property
     def message(self) -> str:
         return 'Password should be a string type'
 
 
 @dataclass(frozen=True, eq=False)
-class PasswordIsEmptyException(ApplicationException):
+class PasswordIsEmptyException(DomainException):
     @property
     def message(self) -> str:
         return 'Password is empty'
 
 
 @dataclass(frozen=True, eq=False)
-class PasswordTooShortException(ApplicationException):
+class PasswordTooShortException(DomainException):
     @property
     def message(self) -> str:
         return 'Password is too short'
 
 
 @dataclass(frozen=True, eq=False)
-class PasswordTooLongException(ApplicationException):
+class PasswordTooLongException(DomainException):
     @property
     def message(self) -> str:
         return 'Password is too long'
 
 
 @dataclass(frozen=True, eq=False)
-class PasswordNotContainingDigitsException(ApplicationException):
+class PasswordNotContainingDigitsException(DomainException):
     @property
     def message(self) -> str:
         return 'Password must contain at least one digit'
 
 
 @dataclass(frozen=True, eq=False)
-class PasswordNotContainingCapitalLetterException(ApplicationException):
+class PasswordNotContainingCapitalLetterException(DomainException):
     @property
     def message(self) -> str:
         return 'Password must contain at least one capital letter'
 
 
 @dataclass(frozen=True, eq=False)
-class PasswordNotContainingSpecialSymbolException(ApplicationException):
+class PasswordNotContainingSpecialSymbolException(DomainException):
     @property
     def message(self) -> str:
         return 'Password must contain at least special symbol (e.g. !@#$%^&*()-_=+[]{}|;:,.<>?/~` )'
+
+
+@dataclass(frozen=True, eq=False)
+class InsufficientCredentialsInfoException(DomainException):
+    @property
+    def message(self) -> str:
+        return 'All credentials are empty. Either email or phone number must be provided.'

@@ -79,7 +79,10 @@ class RabbitMQConsumer(BaseConsumer):
 
     async def process_message(self, message: AbstractIncomingMessage):
         try:
-            await self.external_events_map[message.routing_key](orjson.loads(message.body))
+            handler = self.external_events_map.get(message.routing_key)
+            await handler(orjson.loads(message.body)) if handler else (
+                logger.info('No handler found for message with routing key: %s', message.routing_key)
+            )
         except Exception as e:
             logger.exception(
                 'Error processing message(%(body)s)',

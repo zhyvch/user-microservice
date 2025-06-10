@@ -3,10 +3,16 @@ from dataclasses import dataclass
 
 import aio_pika
 import orjson
-from aio_pika.abc import AbstractRobustConnection, AbstractRobustChannel, AbstractExchange, ExchangeType
+from aio_pika.abc import (
+    AbstractRobustConnection,
+    AbstractRobustChannel,
+    AbstractExchange,
+    ExchangeType,
+)
 
 from domain.events.base import BaseEvent
 from infrastructure.producers.base import BaseProducer
+
 
 logger = logging.getLogger(__name__)
 

@@ -5,15 +5,20 @@ from domain.commands.users import (
     UpdateUserCredentialsStatusCommand,
     UpdateUserPhotoCommand,
     DeleteUserCommand,
+    UpdateUserEmailCommand,
+    UpdateUserPhoneNumberCommand,
 )
 from domain.entities.users import UserWithCredentialsEntity, UserCredentialsStatus
 from domain.events.users import UserCreatedEvent, UserDeletedEvent
-from domain.value_objects.users import PasswordVO
+from domain.value_objects.users import PasswordVO, EmailVO, PhoneNumberVO
+from infrastructure.exception.users import UserNotFoundException
 from service.handlers.command.users import (
     CreateUserCommandHandler,
     UpdateUserCredentialsStatusCommandHandler,
     UpdateUserPhotoCommandHandler,
     DeleteUserCommandHandler,
+    UpdateUserEmailCommandHandler,
+    UpdateUserPhoneNumberCommandHandler,
 )
 
 
@@ -54,10 +59,9 @@ class TestCommandHandlers:
             handler = DeleteUserCommandHandler(uow=fake_user_uow)
             await handler(command=command)
 
-        async with fake_user_uow:
-            user = await fake_user_uow.users.get(user_id=random_user_entity.id)
-
-        assert user is None
+        with pytest.raises(UserNotFoundException):
+            async with fake_user_uow:
+                user = await fake_user_uow.users.get(user_id=random_user_entity.id)
 
         assert UserDeletedEvent in [event.__class__ for event in random_user_entity.events]
 
@@ -110,3 +114,46 @@ class TestCommandHandlers:
         assert user is not None
         assert user.id == random_user_entity.id
         assert user.photo == new_photo != old_photo
+
+
+    async def test_update_user_email_command_handler(
+        self, random_user_entity, fake_user_uow
+    ):
+        async with fake_user_uow:
+            await fake_user_uow.users.add(random_user_entity)
+            await fake_user_uow.commit()
+            user = await fake_user_uow.users.get(user_id=random_user_entity.id)
+
+        new_email = EmailVO('testmain@testmail.com')
+        command = UpdateUserEmailCommand(
+            user_id=random_user_entity.id,
+            new_email=new_email,
+        )
+        handler = UpdateUserEmailCommandHandler(uow=fake_user_uow)
+        await handler(command=command)
+        async with fake_user_uow:
+            user = await fake_user_uow.users.get(user_id=random_user_entity.id)
+        assert user.id == random_user_entity.id
+        assert user.email == new_email
+
+
+    async def test_update_user_phone_number_command_handler(
+        self, random_user_entity, fake_user_uow
+    ):
+        async with fake_user_uow:
+            await fake_user_uow.users.add(random_user_entity)
+            await fake_user_uow.commit()
+            user = await fake_user_uow.users.get(user_id=random_user_entity.id)
+
+        new_phone_number = PhoneNumberVO('+1234567890')
+        command = UpdateUserPhoneNumberCommand(
+            user_id=random_user_entity.id,
+            new_phone_number=new_phone_number,
+        )
+        handler = UpdateUserPhoneNumberCommandHandler(uow=fake_user_uow)
+        await handler(command=command)
+        async with fake_user_uow:
+            user = await fake_user_uow.users.get(user_id=random_user_entity.id)
+        assert user is not None
+        assert user.id == random_user_entity.id
+        assert user.phone_number == new_phone_number

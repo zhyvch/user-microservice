@@ -9,7 +9,7 @@ from settings.config import settings
 
 class UserCreateSchema(BaseModel):
     password: str
-    email: str
+    email: str | None = None
     phone_number: str | None = None
     first_name: str | None = None
     last_name: str | None = None
@@ -18,7 +18,7 @@ class UserCreateSchema(BaseModel):
     def to_user_with_credentials_entity(self) -> UserWithCredentialsEntity:
         return UserWithCredentialsEntity(
             user=UserEntity(
-                email=EmailVO(self.email),
+                email=EmailVO(self.email) if self.email else None,
                 phone_number=PhoneNumberVO(self.phone_number) if self.phone_number else None,
                 first_name=NameVO(self.first_name) if self.first_name else None,
                 last_name=NameVO(self.last_name) if self.last_name else None,
@@ -44,7 +44,7 @@ class UserDetailSchema(BaseModel):
     id: UUID
     created_at: datetime
     photo: str
-    email: str
+    email: str | None
     phone_number: str | None
     first_name: str | None
     last_name: str | None
@@ -62,6 +62,7 @@ class UserDetailSchema(BaseModel):
                 'first_name': 'John',
                 'last_name': 'Doe',
                 'middle_name': None,
+                'credentials_status': 'success',
             }
         }
 
@@ -71,7 +72,7 @@ class UserDetailSchema(BaseModel):
             id=user.id,
             created_at=user.created_at,
             photo=user.photo,
-            email=user.email.as_generic(),
+            email=user.email.as_generic() if user.email else None,
             phone_number=user.phone_number.as_generic() if user.phone_number else None,
             first_name=user.first_name.as_generic() if user.first_name else None,
             last_name=user.last_name.as_generic() if user.last_name else None,

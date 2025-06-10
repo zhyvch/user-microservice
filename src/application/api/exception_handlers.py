@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from sqlalchemy.exc import DatabaseError
 from starlette.exceptions import HTTPException
 
-from domain.exceptions.base import ApplicationException
+from domain.exceptions.base import DomainException
 from service.exceptions.base import ServiceException
 
 
@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def exception_registry(app: FastAPI) -> None:
-    @app.exception_handler(ApplicationException)
-    def handle_application_exception(request: Request, exc: ApplicationException):
+    @app.exception_handler(DomainException)
+    def handle_application_exception(request: Request, exc: DomainException):
         logger.error('%s: %s', exc.__class__.__name__, exc.message)
         return ORJSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

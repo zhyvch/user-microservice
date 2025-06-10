@@ -1,9 +1,16 @@
 import pytest
 from orjson import orjson
 
-from domain.events.users import UserCreatedEvent, UserDeletedEvent, UserRegistrationCompletedEvent
-from service.handlers.event.users import UserCreatedEventHandler, UserDeletedEventHandler, \
-    UserRegistrationCompletedEventHandler
+from domain.events.users import (
+    UserCreatedEvent,
+    UserDeletedEvent,
+    UserRegistrationCompletedEvent,
+)
+from service.handlers.event.users import (
+    UserCreatedEventHandler,
+    UserDeletedEventHandler,
+    UserRegistrationCompletedEventHandler,
+)
 from settings.container import get_external_events_map
 
 
@@ -26,7 +33,8 @@ class TestEventHandlers:
         event = UserCreatedEvent(
             user_id=random_user_entity.id,
             password='VerySecretPa$$word1234',
-            email=random_user_entity.email.value,
+            email=random_user_entity.email.as_generic(),
+            phone_number=random_user_entity.phone_number.as_generic(),
         )
         handler = UserCreatedEventHandler(producer=rabbitmq_producer, topic='user.created')
         await handler(event=event)
@@ -42,6 +50,7 @@ class TestEventHandlers:
         assert len(messages) == 1
         consumed_message = orjson.loads(messages[0].body)
         assert consumed_message['user_id'] == str(random_user_entity.id)
+
 
     async def test_user_deleted_event_handler(
         self, random_user_entity, sqlalchemy_user_uow, rabbitmq_producer, rabbitmq_consumer, message_bus
@@ -92,8 +101,8 @@ class TestEventHandlers:
             user_id=random_user_entity.id,
             photo=random_user_entity.photo,
             created_at=random_user_entity.created_at,
-            email=random_user_entity.email.value,
-            phone_number=random_user_entity.phone_number,
+            email=random_user_entity.email.as_generic(),
+            phone_number=random_user_entity.phone_number.as_generic(),
             first_name=random_user_entity.first_name.value if random_user_entity.first_name else None,
             last_name=random_user_entity.last_name.value if random_user_entity.last_name else None,
             middle_name=random_user_entity.middle_name.value if random_user_entity.middle_name else None,

@@ -19,10 +19,10 @@ class TestRabbitMQConsumer:
         assert rabbitmq_producer.connection is not None
 
         rabbitmq_consumer.external_events_map = get_fake_external_events_map()
-        await rabbitmq_producer.publish(event=event, topic='fake.topic')
+        await rabbitmq_producer.publish(event=event, topic='fake.user.topic')
         consuming_task = asyncio.create_task(rabbitmq_consumer.consume())
 
-        handler = rabbitmq_consumer.external_events_map.get('fake.topic')
+        handler = rabbitmq_consumer.external_events_map.get('fake.user.topic')
         retry_count = 0
         max_retries = 10
         while handler.body is None and retry_count < max_retries:

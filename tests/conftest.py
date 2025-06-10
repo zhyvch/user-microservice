@@ -18,10 +18,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from service.message_bus import MessageBus
 from service.units_of_work.users.postgresql import SQLAlchemyUserUnitOfWork
-from settings.config import settings
 from settings.container import get_commands_map, get_events_map, get_external_events_map
 from .config import test_settings
-from .fakes import FakeUserRepository, FakeUnitOfWork, FakeProducer, FakeConsumer
+from .fakes import FakeUserRepository, FakeUserUnitOfWork, FakeProducer, FakeConsumer
 
 
 logger = logging.getLogger(__name__)
@@ -84,6 +83,16 @@ def sqlalchemy_user_uow(postgres_session_factory):
     yield uow
 
 
+@pytest.fixture
+def message_bus(sqlalchemy_user_uow, rabbitmq_producer):
+    bus = MessageBus(
+        uow=sqlalchemy_user_uow,
+        commands_map=get_commands_map(uow=sqlalchemy_user_uow),
+        events_map=get_events_map(producer=rabbitmq_producer),
+    )
+    return bus
+
+
 @pytest_asyncio.fixture
 async def rabbitmq_producer():
     producer = RabbitMQProducer(
@@ -122,16 +131,6 @@ async def rabbitmq_consumer(message_bus):
 
 
 @pytest.fixture
-def message_bus(sqlalchemy_user_uow, rabbitmq_producer):
-    bus = MessageBus(
-        uow=sqlalchemy_user_uow,
-        commands_map=get_commands_map(uow=sqlalchemy_user_uow),
-        events_map=get_events_map(producer=rabbitmq_producer),
-    )
-    return bus
-
-
-@pytest.fixture
 def valid_jwt():
     return 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3MTRmNjBmNy0xMGE0LTQxNmMtODllZC1jODdhMTFjYWVlMWYiLCJzdWIiOiJkZjliN2FhNi1iNGU0LTRhMTktOGM4NC01MDRlMzAyZWVlOTgiLCJleHAiOjUzNDc0MjMwNzAsImlhdCI6MTc0NzQyMTI3MCwidHlwZSI6ImFjY2VzcyJ9.FwiVyt5cNZdrAcGlgOJi7i3LPZe8GQl266NgAT-Q-V963EGKK5OI1XCy9_dGgoDlrr6ooUBuebAXmZsJjVRWjj2ilWPOCoELEJmDCYy4e-AefdpCqNR0YGxCM2aRPHApwFAqGuPL-KX0HY2Qm-Tf6Y1QCF1qZ5k14Vy1G7Vrsrc'
 
@@ -164,7 +163,7 @@ def fake_user_repository():
 
 @pytest.fixture
 def fake_user_uow():
-    return FakeUnitOfWork()
+    return FakeUserUnitOfWork()
 
 
 @pytest.fixture
@@ -185,7 +184,7 @@ def fake_producer():
 @pytest.fixture()
 def fake_consumer(fake_message_bus):
     consumer = FakeConsumer(
-        topics_to_consume=settings.USER_SERVICE_CONSUMING_TOPICS,
+        topics_to_consume=test_settings.TESTS_USER_SERVICE_CONSUMING_TOPICS,
         external_events_map=get_external_events_map(bus=fake_message_bus),
     )
     return consumer

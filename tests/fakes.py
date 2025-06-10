@@ -8,6 +8,8 @@ from application.external_events.handlers.base import BaseExternalEventHandler
 from domain.entities.users import UserEntity, UserCredentialsStatus
 from domain.commands.base import BaseCommand
 from domain.events.base import BaseEvent
+from domain.value_objects.users import EmailVO, PhoneNumberVO
+from infrastructure.exception.users import UserNotFoundException
 from infrastructure.producers.base import BaseProducer
 from infrastructure.repositories.users.base import BaseUserRepository
 from service.units_of_work.users.base import BaseUserUnitOfWork
@@ -30,63 +32,112 @@ class SingletonMeta(type):
 class FakeUserRepository(BaseUserRepository):
     users_list: list[UserEntity] = field(default_factory=list)
 
-    async def get(self, user_id: UUID) -> UserEntity | None:
+    async def add(
+        self,
+        user: UserEntity,
+    ) -> None:
+        logger.info('Adding user with ID: %s', user.id)
+        self.users_list.append(user)
+
+
+    async def get(
+        self,
+        user_id: UUID,
+    ) -> UserEntity:
         logger.info('Fetching user with ID: %s', user_id)
         for user in self.users_list:
             if user.id == user_id:
                 logger.info('User found: %s', user_id)
                 return user
         logger.warning('User not found: %s', user_id)
-        return None
+        raise UserNotFoundException(user_id)
 
-    async def remove(self, user_id: UUID) -> None:
-        logger.info('Removing user with ID: %s', user_id)
-        for user in self.users_list:
-            if user.id == user_id:
-                self.users_list.remove(user)
-                logger.debug('User removed successfully: %s', user_id)
-                return None
-        logger.warning('Failed to remove user: %s not found', user_id)
-        return None
 
-    async def update_status(self, user_id: UUID, status: UserCredentialsStatus) -> None:
+    async def update_status(
+        self,
+        user_id: UUID,
+        status: UserCredentialsStatus,
+    ) -> UserEntity:
         logger.info('Updating status for user %s to %s', user_id, status)
         for user in self.users_list:
             if user_id == user.id:
                 user.credentials_status = status
                 logger.debug('Status updated successfully for user %s', user_id)
-                return None
+                return user
         logger.warning('Failed to update status: user %s not found', user_id)
-        return None
+        raise UserNotFoundException(user_id)
 
-    async def update_photo(self, user_id: UUID, photo: str) -> None:
+
+    async def update_photo(
+        self,
+        user_id: UUID,
+        photo: str,
+    ) -> UserEntity:
         logger.info('Updating photo for user %s', user_id)
         for user in self.users_list:
             if user_id == user.id:
                 user.photo = photo
                 logger.debug('Photo updated successfully for user %s', user_id)
-                return None
+                return user
         logger.warning('Failed to update photo: user %s not found', user_id)
-        return None
+        raise UserNotFoundException(user_id)
 
-    async def add(self, user: UserEntity) -> None:
-        logger.info('Adding user with ID: %s', user.id)
-        self.users_list.append(user)
-        return None
+    async def update_email(
+        self,
+        user_id: UUID,
+        new_email: str,
+    ) -> UserEntity:
+        logger.info('Updating email for user %s to %s', user_id, new_email)
+        for user in self.users_list:
+            if user_id == user.id:
+                user.email = EmailVO(new_email)
+                logger.debug('Email updated successfully for user %s', user_id)
+                return user
+        logger.warning('Failed to update email: user %s not found', user_id)
+        raise UserNotFoundException(user_id)
 
 
-class FakeUnitOfWork(BaseUserUnitOfWork):
+    async def update_phone_number(
+        self,
+        user_id: UUID,
+        new_phone_number: str,
+    ) -> UserEntity:
+        logger.info('Updating phone number for user %s to %s', user_id, new_phone_number)
+        for user in self.users_list:
+            if user_id == user.id:
+                user.phone_number = PhoneNumberVO(new_phone_number)
+                logger.debug('Phone number updated successfully for user %s', user_id)
+                return user
+        logger.warning('Failed to update phone number: user %s not found', user_id)
+        raise UserNotFoundException(user_id)
+
+
+    async def remove(
+        self,
+        user_id: UUID,
+    ) -> UserEntity:
+        logger.info('Removing user with ID: %s', user_id)
+        for user in self.users_list:
+            if user.id == user_id:
+                self.users_list.remove(user)
+                logger.debug('User removed successfully: %s', user_id)
+                return user
+        logger.warning('Failed to remove user: %s not found', user_id)
+        raise UserNotFoundException(user_id)
+
+
+class FakeUserUnitOfWork(BaseUserUnitOfWork):
     def __init__(self):
-        logger.debug('Initializing FakeUnitOfWork')
+        logger.debug('Initializing FakeUserUnitOfWork')
         self.users = FakeUserRepository()
         self.committed = False
 
     async def commit(self):
-        logger.debug('Committing FakeUnitOfWork')
+        logger.debug('Committing FakeUserUnitOfWork')
         self.committed = True
 
     async def rollback(self):
-        logger.debug('Rolling back FakeUnitOfWork')
+        logger.debug('Rolling back FakeUserUnitOfWork')
         pass
 
 
@@ -123,12 +174,14 @@ class FakeConsumer(BaseConsumer):
             logger.debug('Creating new consuming task')
             self.consuming_task = asyncio.create_task(self.consume())
 
+
     async def stop(self):
         logger.debug('Stopping FakeConsumer')
         if self.consuming_task:
             logger.debug('Cancelling consuming task')
             self.consuming_task.cancel()
             self.consuming_task = None
+
 
     async def consume(self):
         logger.debug('FakeConsumer consuming messages')
@@ -163,6 +216,6 @@ def get_fake_external_events_map() -> dict[str, BaseExternalEventHandler]:
     fake_handler = FakeExternalEventHandler(bus=None)
 
     fake_external_events_map = {
-        'fake.topic': fake_handler,
+        'fake.user.topic': fake_handler,
     }
     return fake_external_events_map

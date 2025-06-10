@@ -1,11 +1,16 @@
-import asyncio
+import random
+import string
 from contextlib import nullcontext as not_raises
 from uuid import uuid4, UUID
 
 import pytest
 import orjson
 
-from application.external_events.handlers.users import UserCredentialsCreatedExternalEventHandler
+from application.external_events.handlers.users import (
+    UserCredentialsCreatedExternalEventHandler,
+    UserEmailUpdatedExternalEventHandler,
+    UserPhoneNumberUpdatedExternalEventHandler,
+)
 from domain.entities.users import UserCredentialsStatus
 from settings.container import get_external_events_map
 
@@ -59,3 +64,65 @@ class TestExternalEventHandlers:
         assert len(messages) == 1
         consumed_message = orjson.loads(messages[0].body)
         assert consumed_message['user_id'] == str(random_user_entity.id)
+
+
+    @pytest.mark.parametrize(
+        'body, expectation',
+        [
+            (
+                    {
+                        'user_id': str(uuid4()),
+                        'new_email': f'{''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(230))}@testmail.com',
+                    }, not_raises()
+            ),
+        ]
+    )
+    async def test_user_email_updated_external_event_handler(
+            self, random_user_entity, sqlalchemy_user_uow, message_bus, body, expectation
+    ):
+        random_user_entity.id = UUID(body['user_id'])
+        async with sqlalchemy_user_uow:
+            await sqlalchemy_user_uow.users.add(random_user_entity)
+            await sqlalchemy_user_uow.commit()
+
+        message_bus.uow = sqlalchemy_user_uow
+
+        handler = UserEmailUpdatedExternalEventHandler(bus=message_bus)
+        with expectation:
+            await handler(body)
+
+        async with sqlalchemy_user_uow:
+            user = await sqlalchemy_user_uow.users.get(body['user_id'])
+            assert user is not None
+            assert user.email.as_generic() == body['new_email']
+
+
+    @pytest.mark.parametrize(
+        'body, expectation',
+        [
+            (
+                    {
+                        'user_id': str(uuid4()),
+                        'new_phone_number': f'+{''.join(random.choice(string.digits) for _ in range(14))}',
+                    }, not_raises()
+            ),
+        ]
+    )
+    async def test_user_phone_number_updated_external_event_handler(
+            self, random_user_entity, sqlalchemy_user_uow, message_bus, body, expectation
+    ):
+        random_user_entity.id = UUID(body['user_id'])
+        async with sqlalchemy_user_uow:
+            await sqlalchemy_user_uow.users.add(random_user_entity)
+            await sqlalchemy_user_uow.commit()
+
+        message_bus.uow = sqlalchemy_user_uow
+
+        handler = UserPhoneNumberUpdatedExternalEventHandler(bus=message_bus)
+        with expectation:
+            await handler(body)
+
+        async with sqlalchemy_user_uow:
+            user = await sqlalchemy_user_uow.users.get(body['user_id'])
+            assert user is not None
+            assert user.phone_number.as_generic() == body['new_phone_number']

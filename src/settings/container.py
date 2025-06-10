@@ -8,13 +8,19 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from application.external_events.consumers.base import BaseConsumer
 from application.external_events.consumers.rabbitmq import RabbitMQConsumer
 from application.external_events.handlers.base import BaseExternalEventHandler
-from application.external_events.handlers.users import UserCredentialsCreatedExternalEventHandler
+from application.external_events.handlers.users import (
+    UserCredentialsCreatedExternalEventHandler,
+    UserEmailUpdatedExternalEventHandler,
+    UserPhoneNumberUpdatedExternalEventHandler,
+)
 from domain.commands.base import BaseCommand
 from domain.commands.users import (
     CreateUserCommand,
     UpdateUserCredentialsStatusCommand,
     UpdateUserPhotoCommand,
     DeleteUserCommand,
+    UpdateUserEmailCommand,
+    UpdateUserPhoneNumberCommand,
 )
 from domain.events.base import BaseEvent
 from domain.events.users import (
@@ -36,6 +42,8 @@ from service.handlers.command.users import (
     UpdateUserCredentialsStatusCommandHandler,
     UpdateUserPhotoCommandHandler,
     DeleteUserCommandHandler,
+    UpdateUserEmailCommandHandler,
+    UpdateUserPhoneNumberCommandHandler,
 )
 from service.handlers.event.base import BaseEventHandler
 from service.handlers.event.users import (
@@ -54,14 +62,19 @@ def get_commands_map(uow: BaseUserUnitOfWork) -> dict[type[BaseCommand], BaseCom
     delete_user_handler = DeleteUserCommandHandler(uow=uow)
     update_user_creds_status_handler = UpdateUserCredentialsStatusCommandHandler(uow=uow)
     update_user_photo_handler = UpdateUserPhotoCommandHandler(uow=uow)
+    update_user_email_handler = UpdateUserEmailCommandHandler(uow=uow)
+    update_user_phone_number_handler = UpdateUserPhoneNumberCommandHandler(uow=uow)
 
     commands_map = {
         CreateUserCommand: create_user_handler,
         DeleteUserCommand: delete_user_handler,
         UpdateUserCredentialsStatusCommand: update_user_creds_status_handler,
         UpdateUserPhotoCommand: update_user_photo_handler,
+        UpdateUserEmailCommand: update_user_email_handler,
+        UpdateUserPhoneNumberCommand: update_user_phone_number_handler,
     }
     return commands_map
+
 
 def get_events_map(producer: BaseProducer) -> dict[type[BaseEvent], list[BaseEventHandler]]:
     user_created_handler = UserCreatedEventHandler(
@@ -84,11 +97,16 @@ def get_events_map(producer: BaseProducer) -> dict[type[BaseEvent], list[BaseEve
     }
     return events_map
 
+
 def get_external_events_map(bus: MessageBus) -> dict[str, BaseExternalEventHandler]:
     user_creds_created_handler = UserCredentialsCreatedExternalEventHandler(bus=bus)
+    user_email_updated_handler = UserEmailUpdatedExternalEventHandler(bus=bus)
+    user_phone_number_updated_handler = UserPhoneNumberUpdatedExternalEventHandler(bus=bus)
 
     external_events_map = {
         'user.credentials.created': user_creds_created_handler,
+        'user.email.updated': user_email_updated_handler,
+        'user.phone_number.updated': user_phone_number_updated_handler,
     }
     return external_events_map
 

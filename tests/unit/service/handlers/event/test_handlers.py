@@ -20,7 +20,8 @@ class TestEventHandlers:
         event = UserCreatedEvent(
             user_id=random_user_entity.id,
             password='VerySecretPa$$word1234',
-            email=random_user_entity.email.value,
+            email=random_user_entity.email.as_generic(),
+            phone_number=random_user_entity.phone_number.as_generic(),
         )
         handler = UserCreatedEventHandler(producer=fake_producer, topic='user.created')
         await handler(event=event)
