@@ -42,7 +42,6 @@ def pytest_ignore_collect(collection_path, config):
     return None
 
 
-
 @pytest_asyncio.fixture(scope='session')
 async def postgres_db():
     engine = create_async_engine(
@@ -78,8 +77,7 @@ async def sqlalchemy_user_repository(postgres_session_factory):
 
 @pytest.fixture
 def sqlalchemy_user_uow(postgres_session_factory):
-    uow = SQLAlchemyUserUnitOfWork()
-    uow.session_factory = postgres_session_factory
+    uow = SQLAlchemyUserUnitOfWork(session_factory=postgres_session_factory)
     yield uow
 
 
@@ -96,7 +94,7 @@ def message_bus(sqlalchemy_user_uow, rabbitmq_producer):
 @pytest_asyncio.fixture
 async def rabbitmq_producer():
     producer = RabbitMQProducer(
-        host=test_settings.TESTS_RABBITMQ_HOST if test_settings.DOCKER_RUN else '127.0.0.1',
+        host=test_settings.TESTS_RABBITMQ_HOST,
         port=test_settings.TESTS_RABBITMQ_PORT if not test_settings.DOCKER_RUN else '5432',
         login=test_settings.TESTS_RABBITMQ_USER,
         password=test_settings.TESTS_RABBITMQ_PASSWORD,
@@ -111,7 +109,7 @@ async def rabbitmq_producer():
 @pytest_asyncio.fixture
 async def rabbitmq_consumer(message_bus):
     consumer = RabbitMQConsumer(
-        host=test_settings.TESTS_RABBITMQ_HOST if test_settings.DOCKER_RUN else '127.0.0.1',
+        host=test_settings.TESTS_RABBITMQ_HOST,
         port=test_settings.TESTS_RABBITMQ_PORT if not test_settings.DOCKER_RUN else '5432',
         login=test_settings.TESTS_RABBITMQ_USER,
         password=test_settings.TESTS_RABBITMQ_PASSWORD,

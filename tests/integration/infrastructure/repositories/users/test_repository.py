@@ -28,8 +28,8 @@ class TestSQLAlchemyRepository:
         logger.info('User \'%s\' added to DB', random_user_entity.id)
 
         await sqlalchemy_user_repository.remove(random_user_entity.id)
-        logger.info('User \'%s\' removed from DB', random_user_entity.id)
         await sqlalchemy_user_repository.session.commit()
+        logger.info('User \'%s\' removed from DB', random_user_entity.id)
 
         with pytest.raises(UserNotFoundException):
             await sqlalchemy_user_repository.get(random_user_entity.id)
@@ -48,7 +48,6 @@ class TestSQLAlchemyRepository:
         result = await sqlalchemy_user_repository.get(random_user_entity.id)
         assert result.credentials_status == new_status
         assert result in sqlalchemy_user_repository.loaded_users
-
 
 
     async def test_update_photo(self, random_user_entity, sqlalchemy_user_repository):

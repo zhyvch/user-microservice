@@ -8,7 +8,7 @@ from punq import Container
 
 from application.api.v1.users.schemas import UserCreateSchema, UserDetailSchema
 from domain.commands.users import CreateUserCommand, UpdateUserPhotoCommand, DeleteUserCommand
-from infrastructure.auth.jwt import verify_token, extract_user_id
+from infrastructure.auth.tokens import verify_token, extract_user_id
 from infrastructure.repositories.users.base import BaseUserRepository
 from infrastructure.storages.s3.base import BaseS3Client
 from settings.config import Settings
@@ -26,7 +26,7 @@ async def get_current_user_id(
     return extract_user_id(verify_token(token.credentials))
 
 
-class ImageFormat(Enum):
+class ImageFormat(str, Enum):
     png = 'image/png'
     jpeg = 'image/jpeg'
 
@@ -73,7 +73,7 @@ async def get_photo_download_url(
     key = user.photo
     download_url = await s3_client.generate_presigned_download_url(
         key=key,
-        content_type=content_type.value,
+        content_type=content_type,
     )
     return {'url': download_url}
 
@@ -89,7 +89,7 @@ async def get_photo_upload_post(
     key = f'{settings.USER_SERVICE_MEDIA_PATH}/user-photos/{current_user_id}/profile-photo.jpg'
     upload_data = await s3_client.generate_presigned_upload_post(
         key=key,
-        content_type=content_type.value,
+        content_type=content_type,
     )
     return upload_data
 

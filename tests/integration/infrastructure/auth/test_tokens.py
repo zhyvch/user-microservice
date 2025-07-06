@@ -1,17 +1,17 @@
 from uuid import UUID
 
 import pytest
-from fastapi import HTTPException
 
-from infrastructure.auth.jwt import verify_token, extract_user_id
+from infrastructure.auth.tokens import verify_token, extract_user_id
+from infrastructure.exception.users import JWTExpiredException, JWTWrongTypeException
 
 
 class TestJWT:
     def test_verify_token(self, valid_jwt, expired_jwt, wrong_type_jwt):
-        with pytest.raises(HTTPException):
+        with pytest.raises(JWTExpiredException):
             verify_token(expired_jwt)
 
-        with pytest.raises(HTTPException):
+        with pytest.raises(JWTWrongTypeException):
             verify_token(wrong_type_jwt)
 
         payload = verify_token(valid_jwt)

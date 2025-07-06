@@ -21,7 +21,7 @@ class TestEventHandlers:
         self, random_user_entity, sqlalchemy_user_uow, rabbitmq_producer, rabbitmq_consumer, message_bus
     ):
         queue = await rabbitmq_consumer.channel.declare_queue(
-            name="",
+            name='',
             durable=False,
             exclusive=True,
             auto_delete=True
@@ -56,7 +56,7 @@ class TestEventHandlers:
         self, random_user_entity, sqlalchemy_user_uow, rabbitmq_producer, rabbitmq_consumer, message_bus
     ):
         queue = await rabbitmq_consumer.channel.declare_queue(
-            name="",
+            name='',
             durable=False,
             exclusive=True,
             auto_delete=True

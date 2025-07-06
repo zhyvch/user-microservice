@@ -15,6 +15,10 @@ services:
     container_name: tests-user-postgres
     ports:
       - '${TESTS_POSTGRES_PORT}:5432'
+    environment:
+      - POSTGRES_USER=${TESTS_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${TESTS_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${TESTS_POSTGRES_DB}
     env_file:
       - ../.env.tests
     volumes:

@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from infrastructure.storages.database import session_factory
 from infrastructure.repositories.users.postgresql import SQLAlchemyUserRepository
 from service.exceptions.users import TransactionException
 from service.units_of_work.users.base import BaseUserUnitOfWork
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SQLAlchemyUserUnitOfWork(BaseUserUnitOfWork):
-    session_factory: async_sessionmaker = session_factory
+    session_factory: async_sessionmaker
 
     async def __aenter__(self):
         logger.debug('Opening database session')

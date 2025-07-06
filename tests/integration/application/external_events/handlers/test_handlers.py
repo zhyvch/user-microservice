@@ -29,7 +29,7 @@ class TestExternalEventHandlers:
             self, random_user_entity, sqlalchemy_user_uow, rabbitmq_consumer, message_bus, body, expectation
     ):
         queue = await rabbitmq_consumer.channel.declare_queue(
-            name="",
+            name='',
             durable=False,
             exclusive=True,
             auto_delete=True
